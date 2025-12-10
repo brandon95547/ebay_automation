@@ -59,7 +59,7 @@ def main():
         page.wait_for_load_state("domcontentloaded")
 
         # Get title of eBay listing
-        ebay_title = page.locator("h1").inner_text().strip()
+        ebay_title = page.locator("h1.x-item-title__mainTitle span.ux-textspans--BOLD").first.inner_text().strip()
         print(f"\nEBAY LISTING TITLE:\n{ebay_title}")
 
         # STEP 2: Open Poshmark closet
@@ -96,6 +96,13 @@ def main():
         matches = []
         for t in titles:
             t_norm = t.lower().strip()
+            # LOG what we're comparing
+            print("=== TITLE CHECK ===")
+            print(f"Ebay Title:     {ebay_title}")
+            print(f"Checking Title: {t}")
+            print(f"ebay_norm:      {ebay_norm}")
+            print(f"t_norm:         {t_norm}")
+            print("-------------------")
             if ebay_norm in t_norm or t_norm in ebay_norm:
                 matches.append(t)
 
