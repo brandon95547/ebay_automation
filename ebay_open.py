@@ -1,5 +1,5 @@
 from pathlib import Path
-import os
+import os, re
 
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
@@ -23,11 +23,10 @@ PROFILE_DIR = BASE_DIR / ".playwright-profile"
 # Downloads folder (future use)
 DOWNLOAD_DIR = BASE_DIR / "downloads"
 
-
 def main():
     PROFILE_DIR.mkdir(exist_ok=True)
     DOWNLOAD_DIR.mkdir(exist_ok=True)
-
+    
     with sync_playwright() as p:
         browser = p.chromium.launch_persistent_context(
             user_data_dir=str(PROFILE_DIR),
@@ -85,24 +84,23 @@ def main():
 
         # STEP 4: Collect all card titles (a.tile__title)
         title_loc = posh_page.locator("a.tile__title")
-        titles = [t.strip() for t in title_loc.all_inner_texts()]
+        titles = [el.inner_html().strip() for el in title_loc.all()]
+        # first_text = title_loc.first.inner_text() doesnt work with icons and other unicode sometimes
+        # first_html = title_loc.first.inner_html()
         total_listings = len(titles)
+        
 
-        print(f"\nTotal listing cards detected: {total_listings}")
+        print(f"\nTotal listing cards detected: '{total_listings}'")
+        
+        input("\nPaused after counting listings — press ENTER to continue...")
 
         # STEP 5: Check if eBay title is already present in Poshmark titles
         ebay_norm = ebay_title.lower().strip()
+        print("### TITLE ###" + ebay_norm)
 
         matches = []
         for t in titles:
             t_norm = t.lower().strip()
-            # LOG what we're comparing
-            print("=== TITLE CHECK ===")
-            print(f"Ebay Title:     {ebay_title}")
-            print(f"Checking Title: {t}")
-            print(f"ebay_norm:      {ebay_norm}")
-            print(f"t_norm:         {t_norm}")
-            print("-------------------")
             if ebay_norm in t_norm or t_norm in ebay_norm:
                 matches.append(t)
 
