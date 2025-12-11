@@ -1,6 +1,6 @@
 # eBay Automation Project
 
-This project automates interactions with eBay in a controlled and safe way.
+This project automates interactions with eBay and Poshmark in a controlled and safe way.
 
 ## Purpose
 
@@ -12,11 +12,70 @@ The initial goal is:
 This lays the foundation for:
 
 * Scrolling listings
-* Extracting titles, descriptions, prices
+* Extracting titles, descriptions, categories, prices
 * Downloading images
 * Preparing Poshmark listings
+* Uploading images
+* (Soon) Autofilling Poshmark listing fields
 
 All of this is done **locally** — the user has full control.
+
+---
+
+# 📌 Project Call Tree / Flow Diagram
+
+This shows the **exact execution path** of the automation script.
+
+```
+main()
+│
+├── setup_directories()
+│
+├── launch_playwright()
+│   │
+│   └── browser = chromium.launch_persistent_context()
+│
+├── open_ebay_active_listings()
+│   │
+│   ├── wait_for_active_listings()
+│   └── click_first_listing()
+│
+├── extract_ebay_data()
+│   │
+│   ├── get_title()
+│   ├── get_description()
+│   ├── get_category()
+│   ├── get_size()            (later)
+│   ├── get_condition()       (later)
+│   └── get_price()           (later)
+│
+├── open_poshmark_closet()
+│   │
+│   └── scroll_until_no_more_items()
+│
+├── compare_title_with_poshmark()
+│   │
+│   ├── if match_found:
+│   │       └── STOP (listing already exists)
+│   │
+│   └── if NOT found:
+│
+│       ├── download_ebay_images()
+│       │   │
+│       │   ├── extract_zoom_image_urls()
+│       │   ├── download_files()
+│       │   ├── convert_webp_to_jpg()
+│       │   └── make_square_top_crop()
+│       │
+│       ├── open_poshmark_create_listing()
+│       │
+│       ├── upload_images_to_poshmark()
+│       │   └── set_input_files()
+│       │
+│       └── click_apply_button()
+│
+└── wait_for_user_and_close_browser()
+```
 
 ---
 
@@ -59,7 +118,7 @@ source .venv/bin/activate
 .venv\Scripts\activate.bat
 ```
 
-You will now see your shell prompt prefixed like this:
+Your shell prompt will now show:
 
 ```
 (.venv) $
@@ -81,3 +140,5 @@ playwright install
 ```bash
 python ebay_open.py
 ```
+
+---
